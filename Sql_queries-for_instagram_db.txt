@@ -1,0 +1,79 @@
+
+
+
+7 rows in set (0.07 sec)
+
+mysql> --1.find five oldest users
+
+mysql> select * from users orders order by created_at limit 5;
+
+
+mysql> -- 2.what days most users register on?
+
+mysql> select dayname(created_at) as day_of_the_week,
+    -> count(*) as total_count
+    -> from users
+    -> group by day_of_the_week
+    -> order by total_count desc;
+
+
+mysql> --3. find the users who have never posted a photo?
+mysql> select
+    -> users.id,users.username,
+    -> users.created_at as user_joining_date
+    -> from users
+    -> left join photos
+    -> on users.id=photos.user_id
+    -> where photos.user_id is null;
+
+
+mysql> -- 4.we are running a new contest a new contest to see who can get most likes on a single photo..
+mysql> -- find out who won the contest?
+
+mysql> select
+    -> users.id as user_id,username,
+    -> photos.id as photo_id,
+    -> photos.image_url,
+    -> count(*) as total_likes_count
+    -> from photos
+    -> join likes
+    -> on photos.id=likes.photo_id
+    -> join users
+    -> on users.id=photos.user_id
+    -> group by photos.id
+    -> order by total_likes_count desc
+    -> limit 1;
+
+
+mysql> --5. how many times does the average user post?
+mysql> select
+    -> round(
+    -> (select count(*) from photos)/(select count(*) from users)
+    -> ) as average_user_post;
+
+
+mysql> --6. what are the most commonly used hastags?
+
+mysql> select tags.id as tag_id,
+    -> tags.tag_name,
+    -> count(*) as total_tags_count
+    -> from tags
+    -> join photo_tags
+    -> on tags.id=photo_tags.tag_id
+    -> group by tags.id
+    -> order by total_tags_count desc
+    -> limit 5;
+
+
+mysql> --7. find the number of users who have liked evry single photo on the site?
+
+mysql> select users.id as user_id,
+    -> users.username,
+    -> count(*) as total_user_likes
+    -> from users
+    -> join  likes on
+    -> users.id = likes.user_id
+    -> group by users.id
+    -> having total_user_likes=(
+    -> select count(*) from photos
+    -> );
